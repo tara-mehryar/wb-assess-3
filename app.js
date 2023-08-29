@@ -1,9 +1,10 @@
-import express from 'express';
+import express, { response } from 'express';
 import session from 'express-session';
 import lodash from 'lodash';
 import morgan from 'morgan';
 import nunjucks from 'nunjucks';
 import ViteExpress from 'vite-express';
+import axios from 'axios';
 
 const app = express();
 const port = '8000';
@@ -62,11 +63,51 @@ const OTHER_FOSSILS = [
 
 // TODO: Replace this comment with your code
 
+app.get('/top-fossils', (req, res) => {
+    const topFossils = MOST_LIKED_FOSSILS
+    console.log(req.session.name);
+
+    if (req.session.name) {
+      res.render('top-fossils.html.njk', {
+        fossils: topFossils,
+        name: req.session.name
+    });
+    } else {
+      res.redirect('/')
+    }
+    console.log(Object.keys(topFossils))
+})
+
+app.get('/', (req, res) => {
+  if (req.session.name) {
+    res.redirect('/top-fossils')
+  } else {
+    res.render('homepage.html.njk')
+  }
+})
+
+app.get('/get-name', (req, res) => {
+
+  const sess = req.session
+  sess.name = req.query.name
+  console.log(sess.name)
+  res.redirect('/top-fossils')
+
+})
+
+app.post('/like-fossil', (req, res) => {
+    
+})
+
+
+
 app.get('/random-fossil.json', (req, res) => {
   const randomFossil = lodash.sample(OTHER_FOSSILS);
   res.json(randomFossil);
+  // console.log(res)
 });
 
 ViteExpress.listen(app, port, () => {
   console.log(`Server running on http://localhost:${port}...`);
 });
+
